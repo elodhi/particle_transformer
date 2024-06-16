@@ -1,0 +1,147 @@
+selection:
+   ### use `&`, `|`, `~` for logical operations on numpy arrays
+   ### can use functions from `math`, `np` (numpy), and `awkward` in the expression
+   'jets_eta < 2.5'
+
+new_variables:
+   ### [format] name: formula
+   ### can use functions from `math`, `np` (numpy), and `awkward` in the expression
+   mask: ak.ones_like(flow_deta)
+   flow_log_pt: np.log(flow_pt)
+   flow_lognorm_pt: np.log(flow_pt/jets_pt[:, np.newaxis])
+   flow_log_E: np.log(flow_energy)
+   flow_lognorm_E: np.log(flow_energy/jets_energy[:, np.newaxis])
+   flow_radius: np.sqrt(flow_deta ** 2 + flow_dphi ** 2)
+   towers_log_pt: np.log(towers_pt)
+   towers_lognorm_pt: np.log(towers_pt/jets_pt[:, np.newaxis])
+   towers_log_E: np.log(towers_energy)
+   towers_lognorm_E: np.log(towers_energy/jets_energy[:, np.newaxis])
+   towers_radius: np.sqrt(towers_deta ** 2 + towers_dphi ** 2)
+   jet_isQ: jets_PartonTruthLabelID
+   jet_isG: 1-jets_PartonTruthLabelID
+   flow_px: flow_pt*np.cos(flow_dphi)
+   flow_py: flow_pt*np.sin(flow_dphi)
+   flow_pz: flow_pt*np.sinh(flow_deta)
+   towers_px: towers_pt*np.cos(towers_dphi)
+   towers_py: towers_pt*np.sin(towers_dphi)
+   towers_pz: towers_pt*np.sinh(towers_deta)
+   #jets_eta: abs(jets_eta)
+
+preprocess:
+  ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
+  method: manual
+  ### data_fraction: fraction of events to use when calculating the mean/scale for the standardization
+  data_fraction: 0.5
+
+inputs:
+   pf_points: #not used by ParT
+      length: 120
+      pad_mode: wrap
+      vars: 
+         - [flow_deta, null]
+         #- [jets_phi, null]
+         #- [wgts, null]
+         #- [jets_pt, null]
+   pf_features:
+      length: 120
+      pad_mode: wrap
+      vars: 
+      ### [format 1]: var_name (no transformation)
+      ### [format 2]: [var_name, 
+      ###              subtract_by(optional, default=None, no transf. if preprocess.method=manual, auto transf. if preprocess.method=auto), 
+      ###              multiply_by(optional, default=1), 
+      ###              clip_min(optional, default=-5), 
+      ###              clip_max(optional, default=5), 
+      ###              pad_value(optional, default=0)]
+         - flow_deta
+         - flow_dphi
+         - flow_log_pt
+         - flow_log_E
+         - flow_lognorm_pt
+         - flow_lognorm_E
+         - flow_radius
+         #- towers_log_pt
+         #- towers_log_E
+         #- towers_lognorm_pt
+         #- towers_lognorm_E
+         #- towers_radius
+   pf_vectors:
+      length: 120
+      pad_mode: wrap
+      vars: 
+         - [flow_px, null]
+         - [flow_py, null]
+         - [flow_pz, null]
+         - [flow_energy, null]
+         #- [towers_px, null]
+         #- [towers_py, null]
+         #- [towers_pz, null]
+         #- [towers_energy, null]
+   pf_mask:
+      length: 120
+      pad_mode: constant
+      vars: 
+         - [mask, null]
+
+labels:
+   ### type can be `simple`, `custom`
+   ### [option 1] use `simple` for binary/multi-class classification, then `value` is a list of 0-1 labels
+   type: simple
+   value: [jet_isQ, jet_isG]
+   ### [option 2] otherwise use `custom` to define the label, then `value` is a map
+   # type: custom
+   # value: 
+   #    truth_label: label.argmax(1)
+
+observers:
+   - jets_pt
+   - jets_eta
+   #- wgts
+
+weights:
+    use_precomputed_weights: False
+    reweight_method: flat
+    reweight_basewgt: False
+    reweight_vars:
+        jets_pt: [160000.        ,  187857.14285714,  215714.28571429,
+         243571.42857143,  271428.57142857,  299285.71428571,
+         327142.85714286,  355000.        ,  382857.14285714,
+         410714.28571429,  438571.42857143,  466428.57142857,
+         494285.71428571,  522142.85714286,  550000.        ,
+         577857.14285714,  605714.28571429,  633571.42857143,
+         661428.57142857,  689285.71428571,  717142.85714286,
+         745000.        ,  772857.14285714,  800714.28571429,
+         828571.42857143,  856428.57142857,  884285.71428571,
+         912142.85714286,  940000.        ,  967857.14285714,
+         995714.28571429, 1023571.42857143, 1051428.57142857,
+        1079285.71428571, 1107142.85714286, 1135000.        ,
+        1162857.14285714, 1190714.28571429, 1218571.42857143,
+        1246428.57142857, 1274285.71428571, 1302142.85714286,
+        1330000.        , 1357857.14285714, 1385714.28571429,
+        1413571.42857143, 1441428.57142857, 1469285.71428571,
+        1497142.85714286, 1525000.        , 1552857.14285714,
+        1580714.28571429, 1608571.42857143, 1636428.57142857,
+        1664285.71428571, 1692142.85714286, 1720000.        ,
+        1747857.14285714, 1775714.28571429, 1803571.42857143,
+        1831428.57142857, 1859285.71428571, 1887142.85714286,
+        1915000.        , 1942857.14285714, 1970714.28571429,
+        1998571.42857143, 2026428.57142857, 2054285.71428571,
+        2082142.85714286, 2110000.        , 2137857.14285714,
+        2165714.28571429, 2193571.42857143, 2221428.57142857,
+        2249285.71428571, 2277142.85714286, 2305000.        ,
+        2332857.14285714, 2360714.28571429, 2388571.42857143,
+        2416428.57142857, 2444285.71428571, 2472142.85714286,
+        2500000., 2540000., 2580000., 2620000., 2660000., 2700000.,
+        2740000., 2780000., 2820000., 2860000., 2900000., 2940000.,
+        2980000., 3020000., 3060000., 3100000., 3140000., 3180000.,
+        3220000., 3260000., 3300000., 3340000., 3380000., 3420000.,
+        3460000., 3500000.]
+        jets_eta: [0, 2.5]
+    reweight_classes: [
+        jet_isQ, jet_isG
+        ]
+    class_weights: [
+        1, 1
+        ]
+
+        
